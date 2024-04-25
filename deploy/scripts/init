@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+#####################################################
+# Этот скрипт помогает быстро создать новый проект  #
+# laravel в докере, без запуска самого сервера      #
+#####################################################
+
+# Всякие переменные (должны быть в самом верху)                #
+################################################################
+
+ENV_FILE=./.env
+DKCM_FILE=./deploy/conf/web.init.yml
+
+DOCKER_COMPOSE="docker compose --env-file $ENV_FILE -f $DKCM_FILE"
+RUN_IN_DOCKER="${DOCKER_COMPOSE} exec web start-container"
+
+
+# Клонирование репозитория (можно до запуска docker compose)   #
+################################################################
+
+git clone https://github.com/laravel/laravel.git
+cd laravel
+echo "Выберите версию laravel"
+git branch -r
+read LARAVEL_VER
+git checkout $LARAVEL_VER
+git pull
+rm -rf .github .git
+cp -a ./. ../
+cd ..
+rm -rf laravel
+
+cp .env.example .env
+
+# Добавляем нужные для docker
+echo "WWWGROUP=$(id -g $USER)
+WWWUSER=$(id -g $USER)
+PROJECT_DIR=$(pwd)" >> .env
+
+# Запуск деплойного контейнера докер, в нём нет ничего лишнего #
+################################################################
+
+docker rmi forlaravel/1.0
+# $DOCKER_COMPOSE build --no-cache web
+$DOCKER_COMPOSE build web
+$DOCKER_COMPOSE up -d
+
+
+# установка зависимостей проекта (нужен контейнер)             #
+################################################################
+
+$RUN_IN_DOCKER "composer install"
+$RUN_IN_DOCKER "npm install"
+
+
+$DOCKER_COMPOSE down

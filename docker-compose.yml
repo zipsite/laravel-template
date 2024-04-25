@@ -1,11 +1,12 @@
 services:
     web:
         build:
-            context: ./dockerconf
+            context: ./web-container
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
         image: forlaravel/1.0
+        command: start-container
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:

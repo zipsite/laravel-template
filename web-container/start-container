@@ -15,20 +15,11 @@ fi
 
 chmod -R ugo+rw /.composer
 
-if [ ! -d /var/www/html/vendor ]; then
-    exec gosu $WWWUSER "composer install"
-fi
-
-if [ ! -d /var/www/html/node_modules ]; then
-    exec gosu $WWWUSER "npm install"
-fi
-
-
 if [ $# -gt 0 ]; then
     if [ "$SUPERVISOR_PHP_USER" = "root" ]; then
-        exec "$@"
+        eval "$@"
     else
-        exec gosu $WWWUSER "$@"
+        gosu $WWWUSER bash -c "$@"
     fi
 else
     exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
