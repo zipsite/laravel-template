@@ -22,24 +22,25 @@ cd laravel
 echo "Выберите версию laravel"
 git branch -r
 read LARAVEL_VER
-git checkout 11.x
+git checkout $LARAVEL_VER
 git pull
 rm -rf .github .git
 cp -a ./. ../
 cd ..
 rm -rf laravel
 
-cp .env.example .env
 
+echo "/mysql
+/docker-compose.yml" >> .gitignore
+
+cp -f docker-compose.yml.example docker-compose.yml
+cp -f .env.example .env
 echo "
 WWWGROUP=$(id -g $USER)
-WWWUSER=$(id -g $USER)" >> .env.example
+WWWUSER=$(id -u $USER)
+PROJECT_DIR=$(pwd)" >> .env
 
-cp .env.example .env
 
-echo "/mysql" >> .gitignore
-
-echo "PROJECT_DIR=$(pwd)" >> .env
 
 # Запуск деплойного контейнера докер, в нём нет ничего лишнего #
 ################################################################
@@ -57,7 +58,6 @@ $RUN_IN_DOCKER "composer install"
 $RUN_IN_DOCKER "npm install"
 $RUN_IN_DOCKER "php artisan key:generate"
 $RUN_IN_DOCKER "php artisan install:api"
-
 
 
 $DOCKER_COMPOSE down
