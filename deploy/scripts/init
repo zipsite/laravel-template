@@ -31,10 +31,15 @@ rm -rf laravel
 
 cp .env.example .env
 
-# Добавляем нужные для docker
-echo "WWWGROUP=$(id -g $USER)
-WWWUSER=$(id -g $USER)
-PROJECT_DIR=$(pwd)" >> .env
+echo "
+WWWGROUP=$(id -g $USER)
+WWWUSER=$(id -g $USER)" >> .env.example
+
+cp .env.example .env
+
+echo "/mysql" >> .gitignore
+
+echo "PROJECT_DIR=$(pwd)" >> .env
 
 # Запуск деплойного контейнера докер, в нём нет ничего лишнего #
 ################################################################
