@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+ENV_FILE=./.env
+DKCM_FILE=./deploy/conf/web.init.yml
+
+DOCKER_COMPOSE="docker compose --env-file $ENV_FILE -f $DKCM_FILE"
+RUN_IN_DOCKER="${DOCKER_COMPOSE} exec web start-container"
+
+
+cp docker-compose.dev.yml docker-compose.yml
+cp .env.example .env
+echo "
+WWWGROUP=$(id -g $USER)
+WWWUSER=$(id -u $USER)
+PROJECT_DIR=$(pwd)" >> .env
+
+# docker rmi forlaravel/1.0
+# $DOCKER_COMPOSE build --no-cache web
+# $DOCKER_COMPOSE build web
+$DOCKER_COMPOSE up -d
+# $DOCKER_COMPOSE exec web bash
+
+$RUN_IN_DOCKER "composer install"
+$RUN_IN_DOCKER "npm install"
+$RUN_IN_DOCKER "php artisan key:generate"
+
+
+$DOCKER_COMPOSE down
+
+
+DOCKER_COMPOSE="docker compose"
+RUN_IN_DOCKER="${DOCKER_COMPOSE} exec web start-container"
+
+$DOCKER_COMPOSE up -d
+
+$RUN_IN_DOCKER "php artisan migrate"
+
+$DOCKER_COMPOSE down

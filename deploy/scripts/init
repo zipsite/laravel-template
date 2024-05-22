@@ -12,6 +12,7 @@ DKCM_FILE=./deploy/conf/web.init.yml
 
 DOCKER_COMPOSE="docker compose --env-file $ENV_FILE -f $DKCM_FILE"
 RUN_IN_DOCKER="${DOCKER_COMPOSE} exec web start-container"
+LARAVEL_VER=11.x
 
 
 # Клонирование репозитория (можно до запуска docker compose)   #
@@ -21,7 +22,7 @@ git clone https://github.com/laravel/laravel.git
 cd laravel
 echo "Выберите версию laravel"
 git branch -r
-read LARAVEL_VER
+# read LARAVEL_VER
 git checkout $LARAVEL_VER
 git pull
 rm -rf .github .git
