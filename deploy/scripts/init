@@ -34,7 +34,7 @@ rm -rf laravel
 echo "/mysql
 /docker-compose.yml" >> .gitignore
 
-cp -f docker-compose.yml.example docker-compose.yml
+cp -f docker-compose.dev.yml docker-compose.yml
 cp -f .env.example .env
 echo "
 WWWGROUP=$(id -g $USER)
