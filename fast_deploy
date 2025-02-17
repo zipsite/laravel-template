@@ -5,47 +5,49 @@ SCRIPTS_DIR="./deploy/scripts"
 
 # Функция для вывода названий скриптов в папке
 list_scripts() {
-    local counter=1
+    local counter=0
     local script
     echo "Список скриптов в папке:"
-    for script in "$SCRIPTS_DIR"/*; do
-        if [ -f "$script" ]; then
-            echo "($counter) $(basename "$script")"
-            counter=$(expr $counter + 1)
-        fi
+
+    scripts_list=$(find "$SCRIPTS_DIR" -maxdepth 1 -type f)
+
+    for script in $scripts_list; do
+        counter=$(expr $counter + 1)
+        echo "($counter) $(basename "$script")"
     done
+
+    result=$counter
 }
 
 
 # Функция выбора по номеру
 selectScript() {
-    
+    local script_counter="$1"
+    local script_number
+    # Запрашиваем у пользователя ввод номера скрипта
+    echo "Введите номер скрипта (от 1 до $script_counter):"
+    read script_number
+
     # Проверка ввода на корректность
-    if [[ "$script_number" -lt 1 ]] || [[ "$script_number" -gt "$script_count" ]]; then
+    if [[ "$script_number" -lt 1 ]] || [[ "$script_number" -gt "$script_counter" ]]; then
         echo "Ошибка: введите правильный номер скрипта." >&2
         exit 1 # Используем return вместо exit, чтобы не завершать скрипт
     fi
 
     # Возвращаем имя скрипта под этим номером
-    selected_script=$(ls -1 "$SCRIPTS_DIR"/* | sed -n "${script_number}p")
-    echo "$(basename "$selected_script")"
+    result=$(echo "$scripts_list" | sed -n "${script_number}p")
 }
 
 
 execScript() {
     # Получаем полный путь к скрипту, и проверяем его существование
-    script_path="$SCRIPTS_DIR/$1"
-
-    if [ ! -f "$script_path" ]; then
-        echo "Скрипт $script_name не найден."
-        exit 1
-    fi
-
+    local selected_script="$1"
+    local script_name=$(basename "$selected_script")
     # Запрос подтверждения перед выполнением
     echo "Вы уверены, что хотите запустить скрипт $script_name? (y/n)"
     read confirm
     if [ "$confirm" == "y" ]; then
-        bash "$script_path"
+        bash "$selected_script"
     else
         echo "Выполнение отменено."
         exit 0
@@ -65,23 +67,24 @@ if [ $# -eq 0 ]; then
 
     # Если скрипт вызван без аргументов, покажем ему все скрипты
     list_scripts
+    script_counter=$result
 
-    # Получаем количество скриптов в директории
-    script_count=$(ls -1 "$SCRIPTS_DIR"/* | wc -l)
+    selectScript $script_counter
+    selected_script=$result
 
-    # Запрашиваем у пользователя ввод номера скрипта
-    echo "Введите номер скрипта (от 1 до $script_count):"
-    read script_number
-    
-    script_name=`selectScript`
-    
-    # echo $script_name
-    execScript $script_name
+    execScript $selected_script
 
 elif [ $# -eq 1 ]; then
     # Если скрипт вызван с аргументом, проверяем его существование
     script_name="$1"
-    execScript $script_name
+    # Ищем скрипт по имени в папке SCRIPTS_DIR
+    selected_script=$(find "$SCRIPTS_DIR" -maxdepth 1 -type f -name "$script_name")
+
+    if [ -z "$selected_script" ]; then
+        echo "Скрипт $script_name не найден."
+        exit 1
+    fi
+    execScript $selected_script
 
 else
     echo "Неверное количество аргументов."

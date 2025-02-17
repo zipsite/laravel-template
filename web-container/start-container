@@ -1,25 +1,27 @@
 #!/usr/bin/env bash
-
-if [ "$SUPERVISOR_PHP_USER" != "root" ] && [ "$SUPERVISOR_PHP_USER" != "sail" ]; then
+# Check if SUPERVISOR_PHP_USER is set to either 'root' or 'sail'
+if [[ "$SUPERVISOR_PHP_USER" != "root" && "$SUPERVISOR_PHP_USER" != "sail" ]]; then
     echo "You should set SUPERVISOR_PHP_USER to either 'sail' or 'root'."
     exit 1
 fi
 
-if [ ! -z "$WWWUSER" ]; then
-    usermod -u $WWWUSER sail
+# Update sail user ID if WWWUSER is set
+if [[ -n "$WWWUSER" ]]; then
+    usermod -u "$WWWUSER" sail
 fi
 
-if [ ! -d /.composer ]; then
-    mkdir /.composer
-fi
+# Create /.composer directory if it doesn't exist
+mkdir -p /.composer
 
+# Set read/write/execute permissions for all users on /.composer
 chmod -R ugo+rw /.composer
 
-if [ $# -gt 0 ]; then
-    if [ "$SUPERVISOR_PHP_USER" = "root" ]; then
-        eval "$@"
+# Execute the provided command or start supervisord
+if [[ $# -gt 0 ]]; then
+    if [[ "$SUPERVISOR_PHP_USER" == "root" ]]; then
+        exec "$@"
     else
-        gosu $WWWUSER bash -c "$@"
+        exec gosu "$WWWUSER" bash -c "$@"
     fi
 else
     exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
