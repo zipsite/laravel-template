@@ -19,7 +19,7 @@ list_scripts() {
 
 # Функция выбора по номеру
 selectScript() {
-    
+
     # Проверка ввода на корректность
     if [[ "$script_number" -lt 1 ]] || [[ "$script_number" -gt "$script_count" ]]; then
         echo "Ошибка: введите правильный номер скрипта." >&2
@@ -72,9 +72,9 @@ if [ $# -eq 0 ]; then
     # Запрашиваем у пользователя ввод номера скрипта
     echo "Введите номер скрипта (от 1 до $script_count):"
     read script_number
-    
+
     script_name=`selectScript`
-    
+
     # echo $script_name
     execScript $script_name
 

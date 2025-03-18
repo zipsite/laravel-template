@@ -14,8 +14,8 @@ WWWGROUP=$(id -g $USER)
 WWWUSER=$(id -u $USER)
 PROJECT_DIR=$(pwd)" >> .env
 
-# docker rmi forlaravel/1.0
-# $DOCKER_COMPOSE build --no-cache web
+docker rmi forlaravel/1.1
+$DOCKER_COMPOSE build --no-cache web
 # $DOCKER_COMPOSE build web
 $DOCKER_COMPOSE up -d
 # $DOCKER_COMPOSE exec web bash
@@ -23,6 +23,7 @@ $DOCKER_COMPOSE up -d
 $RUN_IN_DOCKER "composer install"
 $RUN_IN_DOCKER "npm install"
 $RUN_IN_DOCKER "php artisan key:generate"
+$RUN_IN_DOCKER "php artisan jwt:secret"
 
 
 $DOCKER_COMPOSE down
