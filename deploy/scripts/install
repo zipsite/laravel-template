@@ -23,7 +23,6 @@ $DOCKER_COMPOSE up -d
 $RUN_IN_DOCKER "composer install"
 $RUN_IN_DOCKER "npm install"
 $RUN_IN_DOCKER "php artisan key:generate"
-$RUN_IN_DOCKER "php artisan jwt:secret"
 
 
 $DOCKER_COMPOSE down
